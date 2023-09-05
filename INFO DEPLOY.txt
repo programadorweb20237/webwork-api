@@ -1,0 +1,8 @@
+EL FRONT END ESTA EN FIREBASE FUNCIONANDO
+https://dairysolutions.web.app/
+
+EL BACKEND ESTA EN RENDER.COM FUNCIONANDO
+https://dairy-api-p1w5.onrender.com/
+
+LA BASE DE DATOS ESTA EN RAILWAY.APP FUNCIONANDO
+https://railway.app/
