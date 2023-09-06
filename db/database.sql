@@ -1,6 +1,6 @@
--- CREATE DATABASE IF NOT EXISTS companydb;
+CREATE DATABASE IF NOT EXISTS railway;
 
--- USE companydb;
+USE railway;
 
 CREATE TABLE employee (
   id INT(11) NOT NULL AUTO_INCREMENT,
