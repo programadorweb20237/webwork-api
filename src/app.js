@@ -12,7 +12,7 @@ const app = express();
 
 // Configurar CORS para permitir solicitudes desde el dominio de tu frontend
 const corsOptions = {
-  origin: 'https://dairysolutions.web.app/',
+  origin: 'https://dairysolutions.web.app',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Si tu aplicación utiliza credenciales (cookies, autenticación, etc.)
 };
