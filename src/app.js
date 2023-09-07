@@ -66,8 +66,8 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
   try {
     const connection = await mysql2.createConnection(dbConfig);
 
-    // Si 'code' es "Codigo", ignora esta fila y no la insertes en la base de datos
-    if (code !== "Codigo") {
+    // Si 'code' es "Codigo" o está vacío, ignora esta fila y no la insertes en la base de datos
+    if (code !== "Codigo" && code !== null && code.trim() !== "") {
       // Actualiza todas las filas con el mismo 'code'
       await connection.execute(
         'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
@@ -87,7 +87,7 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
         console.log(`Nuevo registro insertado para el código ${code}`);
       }
     } else {
-      console.log(`Fila con 'code' igual a "Codigo" ignorada`);
+      console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
     }
 
     // Cierra la conexión a la base de datos
@@ -114,17 +114,16 @@ for (let rowNum = 7; rowNum <= 100; rowNum++) {
   const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
   const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
 
-  // Si 'code' es "Codigo", ignora esta fila y no la insertes en la base de datos
-  if (code !== "Codigo") {
+  // Si 'code' es "Codigo" o no es una cadena vacía, ignora esta fila y no la insertes en la base de datos
+  if (typeof code === 'string' && code.trim() !== "" && code !== "Codigo") {
     // Inserta o actualiza los datos en la base de datos
     insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
     console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
   } else {
-    console.log(`Fila con 'code' igual a "Codigo" ignorada`);
+    console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
   }
 }
 
-// Resto del código de tu aplicación...
 // Resto del código de tu aplicación...
 
 
