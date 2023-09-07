@@ -10,7 +10,7 @@ import productsRoutes from "./routes/products.routes.js";
 
 import fs from 'fs';
 import xlsx from 'xlsx';
-import mysql from 'mysql2/promise';
+import mysql2 from 'mysql2/promise';
 
 
 
@@ -48,6 +48,7 @@ app.use((req, res, next) => {
 
 
 
+// Resto de la configuración de tu servidor...
 
 // Configura la conexión a la base de datos MySQL
 const dbConfig = {
@@ -58,30 +59,47 @@ const dbConfig = {
   database: 'railway',
 };
 
-// Función para insertar datos en la base de datos
-async function insertarDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) {
+// Función para insertar o actualizar datos en la base de datos
+async function insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) {
   try {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await mysql2.createConnection(dbConfig);
 
-    // Realiza la inserción en la tabla 'quimicos'
-    await connection.execute(
-      'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+    // Verifica si el registro con el mismo 'code' ya existe en la base de datos
+    const [existingRow] = await connection.query(
+      'SELECT * FROM quimicoNormal WHERE code = ? LIMIT 1',
+      [code]
     );
 
-    console.log('Datos insertados correctamente en la base de datos');
+    if (existingRow.length > 0) {
+      // Si el registro existe, actualiza sus campos
+      await connection.execute(
+        'UPDATE quimicoNormal SET description = ?, presentation = ?, dealerPrice = ?, retailPrice = ?, costoKilo = ? WHERE code = ?',
+        [description, presentation, dealerPrice, retailPrice, costoKilo, code]
+      );
+
+      console.log(`Registro actualizado para el código ${code}`);
+    } else {
+      // Si el registro no existe, realiza una inserción
+      await connection.execute(
+        'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
+        'VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+      );
+
+      console.log(`Nuevo registro insertado para el código ${code}`);
+    }
 
     // Cierra la conexión a la base de datos
     await connection.end();
   } catch (error) {
-    console.error('Error al insertar datos en la base de datos:', error);
+    console.error('Error al insertar o actualizar datos en la base de datos:', error);
   }
-};
+}
 
 // Lee el archivo Excel
 const workbook = xlsx.readFile('./src/archivo.xlsm');
 
-// Selecciona lla hoja 'Quimicos'
+// Selecciona la hoja 'Quimicos'
 const worksheet = workbook.Sheets['Quimicos'];
 
 // Lee los valores de las celdas A7 a F7
@@ -93,16 +111,11 @@ const dealerPrice = worksheet['D7'] ? parseFloat(worksheet['D7'].v).toFixed(2) :
 const retailPrice = worksheet['E7'] ? parseFloat(worksheet['E7'].v).toFixed(2) : null;
 const costoKilo = worksheet['F7'] ? parseFloat(worksheet['F7'].v).toFixed(2) : null;
 
-// Inserta los datos en la bbase de datos
-insertarDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-console.log (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+// Inserta o actualiza los datos en la base de datos
+insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
 
-
-
-
-
-
-
+// Resto del código de tu aplicación...
 
 
 
