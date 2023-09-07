@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 
 
 // Resto de la configuración de tu servidor...
-// Resto de la configuración de tu servidor...
+// Resto de la configuración de tu servidor....
 
 // Configura la conexión a la base de datos MySQL
 const dbConfig = {
@@ -61,31 +61,33 @@ const dbConfig = {
 
 
 
-
 // Función para insertar o actualizar datos en la base de datos
 async function insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) {
   try {
     const connection = await mysql2.createConnection(dbConfig);
 
-   
-
-    // Actualiza todas las filas con el mismo 'code'
-    await connection.execute(
-      'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
-      [dealerPrice, retailPrice, costoKilo, description, presentation, code]
-    );
-
-    if (connection.affectedRows > 0) {
-      console.log(`Registros actualizados para el código ${code}`);
-    } else {
-      // Si no se actualiza ninguna fila, inserta una nueva
+    // Si 'code' es "Codigo", ignora esta fila y no la insertes en la base de datos
+    if (code !== "Codigo") {
+      // Actualiza todas las filas con el mismo 'code'
       await connection.execute(
-        'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+        'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
+        [dealerPrice, retailPrice, costoKilo, description, presentation, code]
       );
 
-      console.log(`Nuevo registro insertado para el código ${code}`);
+      if (connection.affectedRows > 0) {
+        console.log(`Registros actualizados para el código ${code}`);
+      } else {
+        // Si no se actualiza ninguna fila, inserta una nueva
+        await connection.execute(
+          'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
+          'VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+        );
+
+        console.log(`Nuevo registro insertado para el código ${code}`);
+      }
+    } else {
+      console.log(`Fila con 'code' igual a "Codigo" ignorada`);
     }
 
     // Cierra la conexión a la base de datos
@@ -112,14 +114,14 @@ for (let rowNum = 7; rowNum <= 100; rowNum++) {
   const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
   const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
 
-  // Reemplaza "Codigo" por null en el campo 'code'
-  if (code === "Codigo") {
-    code = null;
+  // Si 'code' es "Codigo", ignora esta fila y no la insertes en la base de datos
+  if (code !== "Codigo") {
+    // Inserta o actualiza los datos en la base de datos
+    insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+    console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+  } else {
+    console.log(`Fila con 'code' igual a "Codigo" ignorada`);
   }
-
-  // Inserta o actualiza los datos en la base de datos
-  insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-  console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
 }
 
 // Resto del código de tu aplicación...
