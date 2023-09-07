@@ -48,6 +48,7 @@ app.use((req, res, next) => {
 
 
 // Resto de la configuración de tu servidor...
+// Resto de la configuración de tu servidor...
 
 // Configura la conexión a la base de datos MySQL
 const dbConfig = {
@@ -63,22 +64,16 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
   try {
     const connection = await mysql2.createConnection(dbConfig);
 
-    // Verifica si el registro con el mismo 'code' ya existe en la base de datos
-    const [existingRow] = await connection.query(
-      'SELECT * FROM quimicoNormal WHERE code = ? LIMIT 1',
-      [code]
+    // Actualiza todas las filas con el mismo 'code'
+    await connection.execute(
+      'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
+      [dealerPrice, retailPrice, costoKilo, description, presentation, code]
     );
 
-    if (existingRow.length > 0) {
-      // Si el registro existe, actualiza los campos que deseas mantener y mantiene 'description' y 'presentation' sin cambios
-      await connection.execute(
-        'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ? WHERE code = ?',
-        [dealerPrice, retailPrice, costoKilo, code]
-      );
-
-      console.log(`Registro actualizado para el código ${code}`);
+    if (connection.affectedRows > 0) {
+      console.log(`Registros actualizados para el código ${code}`);
     } else {
-      // Si el registro no existe, realiza una inserción
+      // Si no se actualiza ninguna fila, inserta una nueva
       await connection.execute(
         'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
         'VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -101,19 +96,22 @@ const workbook = xlsx.readFile('./src/archivo.xlsm');
 // Selecciona la hoja 'Quimicos'
 const worksheet = workbook.Sheets['Quimicos'];
 
-// Lee los valores de las celdas A7 a F7
-const quimicoId = null; // Valor fijo para quimicoId
-const code = worksheet['A7'] ? worksheet['A7'].v : null;
-const description = worksheet['B7'] ? worksheet['B7'].v : null;
-const presentation = worksheet['C7'] ? worksheet['C7'].v : null;
-const dealerPrice = worksheet['D7'] ? parseFloat(worksheet['D7'].v).toFixed(2) : null;
-const retailPrice = worksheet['E7'] ? parseFloat(worksheet['E7'].v).toFixed(2) : null;
-const costoKilo = worksheet['F7'] ? parseFloat(worksheet['F7'].v).toFixed(2) : null;
+// Recorre las filas desde A7 hasta A100
+for (let rowNum = 7; rowNum <= 100; rowNum++) {
+  const quimicoId = null; // Valor fijo para quimicoId
+  const code = worksheet[`A${rowNum}`] ? worksheet[`A${rowNum}`].v : null;
+  const description = worksheet[`B${rowNum}`] ? worksheet[`B${rowNum}`].v : null;
+  const presentation = worksheet[`C${rowNum}`] ? worksheet[`C${rowNum}`].v : null;
+  const dealerPrice = worksheet[`D${rowNum}`] ? parseFloat(worksheet[`D${rowNum}`].v).toFixed(2) : null;
+  const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
+  const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
 
-// Inserta o actualiza los datos en la base de datos
-insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+  // Inserta o actualiza los datos en la base de datos
+  insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+  console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+}
 
+// Resto del código de tu aplicación...
 // Resto del código de tu aplicación...
 
 
