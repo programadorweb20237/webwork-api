@@ -88,6 +88,7 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
       }
     } else {
       console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
+      
     }
 
     // Cierra la conexión a la base de datos
@@ -114,16 +115,22 @@ for (let rowNum = 7; rowNum <= 100; rowNum++) {
   const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
   const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
 
-  // Si 'code' es "Codigo" o no es una cadena vacía, ignora esta fila y no la insertes en la base de datos
-  if (typeof code === 'string' && code.trim() !== "" && code !== "Codigo") {
-    // Inserta o actualiza los datos en la base de datos
-    insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-    console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-  } else {
-    console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
-  }
+// Convertir 'code' en una cadena (varchar) si no lo es
+if (code !== null && typeof code !== 'string') {
+  code = code.toString();
 }
 
+// Si 'code' es "Codigo" o no es una cadena vacía, ignora esta fila y no la insertes en la base de datos
+if (typeof code === 'string' && code.trim() !== "" && code !== "Codigo") {
+  // Inserta o actualiza los datos en la base de datos
+  insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+  console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+} else {
+  console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
+  console.log(`Fila ${rowNum} - Código: "${code}"`);
+}
+};
+// 
 // Resto del código de tu aplicación.....
 
 
