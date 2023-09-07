@@ -124,7 +124,7 @@ for (let rowNum = 7; rowNum <= 100; rowNum++) {
   }
 }
 
-// Resto del código de tu aplicación....
+// Resto del código de tu aplicación.....
 
 
 
