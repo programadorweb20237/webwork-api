@@ -57,8 +57,9 @@ const dbConfig = {
   password: 'V7ewl7LE6sceR1wlMgLL',
   port: 5563,
   database: 'railway',
-};
+  connectTimeout: 60000, // Aumenta el tiempo de espera a 60 segundos (o más si es necesario)
 
+};
 
 
 // Función para insertar o actualizar datos en la base de datos
@@ -66,29 +67,29 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
   try {
     const connection = await mysql2.createConnection(dbConfig);
 
-    // Si 'code' es "Codigo" o está vacío, ignora esta fila y no la insertes en la base de datos
-    if (code !== "Codigo" && code !== null && code.trim() !== "") {
-      // Actualiza todas las filas con el mismo 'code'
+    // Consulta si 'code' ya existe en la base de datos
+    const [rows] = await connection.execute(
+      'SELECT * FROM quimicoNormal WHERE code = ?',
+      [code]
+    );
+
+    if (rows.length > 0) {
+      // Si 'code' existe, actualiza la fila existente
       await connection.execute(
         'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
         [dealerPrice, retailPrice, costoKilo, description, presentation, code]
       );
 
-      if (connection.affectedRows > 0) {
-        console.log(`Registros actualizados para el código ${code}`);
-      } else {
-        // Si no se actualiza ninguna fila, inserta una nueva
-        await connection.execute(
-          'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
-          'VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
-        );
-
-        console.log(`Nuevo registro insertado para el código ${code}`);
-      }
+      console.log(`Registro actualizado para el código ${code}`);
     } else {
-      console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
-      
+      // Si 'code' no existe, inserta una nueva fila
+      await connection.execute(
+        'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
+        'VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+      );
+
+      console.log(`Nuevo registro insertado para el código ${code}`);
     }
 
     // Cierra la conexión a la base de datos
