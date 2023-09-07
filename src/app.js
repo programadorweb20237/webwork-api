@@ -54,6 +54,7 @@ const dbConfig = {
   host: 'containers-us-west-127.railway.app',
   user: 'root',
   password: 'V7ewl7LE6sceR1wlMgLL',
+  port: 5563,
   database: 'railway',
 };
 
@@ -64,7 +65,7 @@ async function insertarDatos(quimicoId, code, description, presentation, dealerP
 
     // Realiza la inserción en la tabla 'quimicos'
     await connection.execute(
-      'INSERT INTO quimicos (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
     );
 
@@ -75,7 +76,7 @@ async function insertarDatos(quimicoId, code, description, presentation, dealerP
   } catch (error) {
     console.error('Error al insertar datos en la base de datos:', error);
   }
-}
+};
 
 // Lee el archivo Excel
 const workbook = xlsx.readFile('./src/archivo.xlsm');
@@ -88,12 +89,12 @@ const quimicoId = null; // Valor fijo para quimicoId
 const code = worksheet['A7'] ? worksheet['A7'].v : null;
 const description = worksheet['B7'] ? worksheet['B7'].v : null;
 const presentation = worksheet['C7'] ? worksheet['C7'].v : null;
-const dealerPrice = worksheet['D7'] ? worksheet['D7'].v : null;
-const retailPrice = worksheet['E7'] ? worksheet['E7'].v : null;
-const costoKilo = worksheet['F7'] ? worksheet['F7'].v : null;
+const dealerPrice = worksheet['D7'] ? parseFloat(worksheet['D7'].v).toFixed(2) : null;
+const retailPrice = worksheet['E7'] ? parseFloat(worksheet['E7'].v).toFixed(2) : null;
+const costoKilo = worksheet['F7'] ? parseFloat(worksheet['F7'].v).toFixed(2) : null;
 
 // Inserta los datos en la bbase de datos
-//insertarDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+insertarDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
 console.log (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
 
 
