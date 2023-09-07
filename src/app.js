@@ -47,7 +47,6 @@ app.use((req, res, next) => {
 
 
 
-
 // Resto de la configuración de tu servidor...
 
 // Configura la conexión a la base de datos MySQL
@@ -71,10 +70,10 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
     );
 
     if (existingRow.length > 0) {
-      // Si el registro existe, actualiza sus campos
+      // Si el registro existe, actualiza los campos que deseas mantener y mantiene 'description' y 'presentation' sin cambios
       await connection.execute(
-        'UPDATE quimicoNormal SET description = ?, presentation = ?, dealerPrice = ?, retailPrice = ?, costoKilo = ? WHERE code = ?',
-        [description, presentation, dealerPrice, retailPrice, costoKilo, code]
+        'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ? WHERE code = ?',
+        [dealerPrice, retailPrice, costoKilo, code]
       );
 
       console.log(`Registro actualizado para el código ${code}`);
@@ -116,8 +115,6 @@ insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, ret
 console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
 
 // Resto del código de tu aplicación...
-
-
 
 
 
