@@ -59,10 +59,15 @@ const dbConfig = {
   database: 'railway',
 };
 
+
+
+
 // Función para insertar o actualizar datos en la base de datos
 async function insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) {
   try {
     const connection = await mysql2.createConnection(dbConfig);
+
+   
 
     // Actualiza todas las filas con el mismo 'code'
     await connection.execute(
@@ -87,6 +92,7 @@ async function insertOrUpdateDatos(quimicoId, code, description, presentation, d
     await connection.end();
   } catch (error) {
     console.error('Error al insertar o actualizar datos en la base de datos:', error);
+    console.log(code);
   }
 }
 
@@ -99,12 +105,17 @@ const worksheet = workbook.Sheets['Quimicos'];
 // Recorre las filas desde A7 hasta A100
 for (let rowNum = 7; rowNum <= 100; rowNum++) {
   const quimicoId = null; // Valor fijo para quimicoId
-  const code = worksheet[`A${rowNum}`] ? worksheet[`A${rowNum}`].v : null;
+  let code = worksheet[`A${rowNum}`] ? worksheet[`A${rowNum}`].v : null;
   const description = worksheet[`B${rowNum}`] ? worksheet[`B${rowNum}`].v : null;
   const presentation = worksheet[`C${rowNum}`] ? worksheet[`C${rowNum}`].v : null;
   const dealerPrice = worksheet[`D${rowNum}`] ? parseFloat(worksheet[`D${rowNum}`].v).toFixed(2) : null;
   const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
   const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
+
+  // Reemplaza "Codigo" por null en el campo 'code'
+  if (code === "Codigo") {
+    code = null;
+  }
 
   // Inserta o actualiza los datos en la base de datos
   insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
