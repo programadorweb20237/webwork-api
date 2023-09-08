@@ -1,79 +1,81 @@
-// quimicoExcelSQl.js
+// productExcelSQL.js
 import xlsx from 'xlsx';
 import mysql2 from 'mysql2/promise';
 
-// Configura la conexión a la base de datos MySQL
-const dbConfig = {
+// Configura el pool de conexiones a la base de datos MySQL
+const pool = mysql2.createPool({
   host: 'containers-us-west-127.railway.app',
   user: 'root',
   password: 'V7ewl7LE6sceR1wlMgLL',
   port: 5563,
   database: 'railway',
-  connectTimeout: 60000, // Aumenta el tiempo de espera a 60 segundos (o más si es necesario)
-};
+  waitForConnections: true, // Espera si no hay conexiones disponibles en el pool
+  connectionLimit: 10, // Limita el número de conexiones concurrentes
+});
 
 // Función para insertar o actualizar datos en la base de datos
-export async function insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) {
+export async function insertOrUpdateDatos(productId, code, description, presentation, dealerPrice, retailPrice) {
+  let connection;
   try {
-    const connection = await mysql2.createConnection(dbConfig);
+    connection = await pool.getConnection();
 
     // Consulta si 'code' ya existe en la base de datos
     const [rows] = await connection.execute(
-      'SELECT * FROM quimicoNormal WHERE code = ?',
+      'SELECT * FROM productNormal WHERE code = ?',
       [code]
     );
 
     if (rows.length > 0) {
       // Si 'code' existe, actualiza la fila existente
       await connection.execute(
-        'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
-        [dealerPrice, retailPrice, costoKilo, description, presentation, code]
+        'UPDATE productNormal SET dealerPrice = ?, retailPrice = ?, description = ?, presentation = ? WHERE code = ?',
+        [dealerPrice, retailPrice, description, presentation, code]
       );
 
       console.log(`Registro actualizado para el código ${code}`);
     } else {
       // Si 'code' no existe, inserta una nueva fila
       await connection.execute(
-        'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
+        'INSERT INTO productNormal (productId, code, description, presentation, dealerPrice, retailPrice) ' +
+        'VALUES (?, ?, ?, ?, ?, ?)',
+        [productId, code, description, presentation, dealerPrice, retailPrice]
       );
 
       console.log(`Nuevo registro insertado para el código ${code}`);
     }
-
-    // Cierra la conexión a la base de datos
-    await connection.end();
   } catch (error) {
     console.error('Error al insertar o actualizar datos en la base de datos:', error);
     console.log(code);
+  } finally {
+    if (connection) {
+      connection.release(); // Libera la conexión de vuelta al pool
+    }
   }
 }
 
 // Función para procesar el archivo Excel
-export function processExcelDataQuimico(filePath) {
+export function processExcelData(filePath) {
   try {
     const workbook = xlsx.readFile(filePath);
-    const worksheet = workbook.Sheets['Quimicos'];
+    const worksheet = workbook.Sheets['Base'];
 
-    for (let rowNum = 7; rowNum <= 100; rowNum++) {
-      const quimicoId = null;
+    for (let rowNum = 5; rowNum <= 1311; rowNum++) {
+      const productId = null;
       let code = worksheet[`A${rowNum}`] ? worksheet[`A${rowNum}`].v : null;
       const description = worksheet[`B${rowNum}`] ? worksheet[`B${rowNum}`].v : null;
       const presentation = worksheet[`C${rowNum}`] ? worksheet[`C${rowNum}`].v : null;
       const dealerPrice = worksheet[`D${rowNum}`] ? parseFloat(worksheet[`D${rowNum}`].v).toFixed(2) : null;
       const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
-      const costoKilo = worksheet[`F${rowNum}`] ? parseFloat(worksheet[`F${rowNum}`].v).toFixed(2) : null;
 
       if (code !== null && typeof code !== 'string') {
         code = code.toString();
       }
 
-      if (typeof code === 'string' && code.trim() !== "" && code !== "Codigo") {
-        insertOrUpdateDatos(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
-        console.log(quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo);
+      if (typeof code === 'string' && code.trim() !== "") {
+        insertOrUpdateDatos(productId, code, description, presentation, dealerPrice, retailPrice);
+        console.log(productId, code, description, presentation, dealerPrice, retailPrice);
       } else {
-        console.log(`Fila con 'code' igual a "Codigo" o vacío ignorada`);
+        console.log(`Fila con 'code' vacío ignorada`);
         console.log(`Fila ${rowNum} - Código: "${code}"`);
       }
     }

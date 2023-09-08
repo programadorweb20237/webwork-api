@@ -2,11 +2,12 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
+
 import employeesRoutes from "./routes/employees.routes.js";
 import indexRoutes from "./routes/index.routes.js";
 import productsRoutes from "./routes/products.routes.js";
-import { processExcelData } from "./quimicoExcelSQL.js";
-
+import { processExcelData } from "./productExcelSQL.js";
+import { processExcelDataQuimico } from "./quimicoExcelSQL.js";
 
 
 import fs from 'fs';
@@ -47,6 +48,7 @@ app.use((req, res, next) => {
 
 // Procesa los datos del archivo Excel
 processExcelData('./src/archivo.xlsm');
+processExcelDataQuimico('./src/archivo.xlsm');
 
 
 
