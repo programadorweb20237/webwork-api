@@ -8,7 +8,7 @@ const dbConfig = {
   user: 'dairycom_nuevvo',
   password: 'buenosaires195591',
   port: 3306,
-  database: 'dairycom_productNormal',
+  database: 'dairycom_quimicoNormal',
   connectTimeout: 60000, // Aumenta el tiempo de espera a 60 segundos (o más si es necesario)
 };
 
@@ -19,14 +19,14 @@ export async function insertOrUpdateDatos(quimicoId, code, description, presenta
 
     // Consulta si 'code' ya existe en la base de datos
     const [rows] = await connection.execute(
-      'SELECT * FROM quimicoNormal WHERE code = ?',
+      'SELECT * FROM dairycom_quimicoNormal WHERE code = ?',
       [code]
     );
 
     if (rows.length > 0) {
       // Si 'code' existe, actualiza la fila existente
       await connection.execute(
-        'UPDATE quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
+        'UPDATE dairycom_quimicoNormal SET dealerPrice = ?, retailPrice = ?, costoKilo = ?, description = ?, presentation = ? WHERE code = ?',
         [dealerPrice, retailPrice, costoKilo, description, presentation, code]
       );
 
@@ -34,7 +34,7 @@ export async function insertOrUpdateDatos(quimicoId, code, description, presenta
     } else {
       // Si 'code' no existe, inserta una nueva fila
       await connection.execute(
-        'INSERT INTO quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
+        'INSERT INTO dairycom_quimicoNormal (quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo) ' +
         'VALUES (?, ?, ?, ?, ?, ?, ?)',
         [quimicoId, code, description, presentation, dealerPrice, retailPrice, costoKilo]
       );
