@@ -4,11 +4,11 @@ import mysql2 from 'mysql2/promise';
 
 // Configura la conexión a la base de datos MySQL
 const dbConfig = {
-  host: 'containers-us-west-127.railway.app',
-  user: 'root',
-  password: 'V7ewl7LE6sceR1wlMgLL',
-  port: 5563,
-  database: 'railway',
+  host: '45.77.158.192',
+  user: 'dairycom_nuevvo',
+  password: 'buenosaires195591',
+  port: 3306,
+  database: 'dairycom_productNormal',
   connectTimeout: 60000, // Aumenta el tiempo de espera a 60 segundos (o más si es necesario)
 };
 
