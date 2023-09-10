@@ -21,14 +21,14 @@ export async function insertOrUpdateDatos(productId, code, description, presenta
 
     // Consulta si 'code' ya existe en la base de datos
     const [rows] = await connection.execute(
-      'SELECT * FROM dairycom_productNormal WHERE code = ?',
+      'SELECT * FROM productNormal WHERE code = ?',
       [code]
     );
 
     if (rows.length > 0) {
       // Si 'code' existe, actualiza la fila existente
       await connection.execute(
-        'UPDATE dairycom_productNormal SET dealerPrice = ?, retailPrice = ?, description = ?, presentation = ? WHERE code = ?',
+        'UPDATE productNormal SET dealerPrice = ?, retailPrice = ?, description = ?, presentation = ? WHERE code = ?',
         [dealerPrice, retailPrice, description, presentation, code]
       );
 
@@ -36,7 +36,7 @@ export async function insertOrUpdateDatos(productId, code, description, presenta
     } else {
       // Si 'code' no existe, inserta una nueva fila
       await connection.execute(
-        'INSERT INTO dairycom_productNormal (productId, code, description, presentation, dealerPrice, retailPrice) ' +
+        'INSERT INTO productNormal (productId, code, description, presentation, dealerPrice, retailPrice) ' +
         'VALUES (?, ?, ?, ?, ?, ?)',
         [productId, code, description, presentation, dealerPrice, retailPrice]
       );
