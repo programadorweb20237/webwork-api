@@ -46,9 +46,9 @@ app.use((req, res, next) => {
   res.status(404).json({ message: "Not found" });
 });
 
-// Procesa los datos del archivo Excel
-processExcelData('./src/archivo.xlsm');
-processExcelDataQuimico('./src/archivo.xlsm');
+////// Procesa los datos del archivo Excel
+//processExcelData('./src/archivo.xlsm');
+//processExcelDataQuimico('./src/archivo.xlsm');
 
 
 
