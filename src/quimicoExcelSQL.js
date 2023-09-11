@@ -6,7 +6,7 @@ import mysql2 from 'mysql2/promise';
 const dbConfig = {
   host: '45.77.158.192',
   user: 'dairycom_nuevvo',
-  password: 'buenosaires195591',
+  password: 'buenosaires159951',
   port: 3306,
   database: 'dairycom_productNormal',
   connectTimeout: 60000, // Aumenta el tiempo de espera a 60 segundos (o más si es necesario)
