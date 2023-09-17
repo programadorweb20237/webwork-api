@@ -1,4 +1,3 @@
-// productExcelSQL.js
 import xlsx from 'xlsx';
 import mysql2 from 'mysql2/promise';
 
@@ -18,6 +17,16 @@ export async function insertOrUpdateDatos(productId, code, description, presenta
   let connection;
   try {
     connection = await pool.getConnection();
+
+    // Verifica y ajusta los valores
+    if (code === "#N/A") {
+      code = "-";
+    }
+
+    if (dealerPrice === 42 && retailPrice === 42) {
+      dealerPrice = 0;
+      retailPrice = 0;
+    }
 
     // Consulta si 'code' ya existe en la base de datos
     const [rows] = await connection.execute(
@@ -64,8 +73,8 @@ export function processExcelData(filePath) {
       let code = worksheet[`A${rowNum}`] ? worksheet[`A${rowNum}`].v : null;
       const description = worksheet[`B${rowNum}`] ? worksheet[`B${rowNum}`].v : null;
       const presentation = worksheet[`C${rowNum}`] ? worksheet[`C${rowNum}`].v : null;
-      const dealerPrice = worksheet[`D${rowNum}`] ? parseFloat(worksheet[`D${rowNum}`].v).toFixed(2) : null;
-      const retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
+      let dealerPrice = worksheet[`D${rowNum}`] ? parseFloat(worksheet[`D${rowNum}`].v).toFixed(2) : null;
+      let retailPrice = worksheet[`E${rowNum}`] ? parseFloat(worksheet[`E${rowNum}`].v).toFixed(2) : null;
 
       if (code !== null && typeof code !== 'string') {
         code = code.toString();

@@ -47,8 +47,8 @@ app.use((req, res, next) => {
 });
 
 /////// Procesa los datos del archivo Excel
-//processExcelData('./src/archivo.xlsm');
-//processExcelDataQuimico('./src/archivo.xlsm');
+processExcelData('./src/archivo.xlsm');
+processExcelDataQuimico('./src/archivo.xlsm');
 
 
 
